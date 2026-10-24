@@ -13,12 +13,19 @@ spring:
       ddl-auto: validate      # las tablas las crea Flyway
     open-in-view: false
 
+  security:                   # usuario TEMPORAL de pruebas (se reemplaza por JWT en el #12)
+    user:
+      name: dev
+      password: ${DEV_PASSWORD}
+
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
       username: ${REDIS_USERNAME:}
       password: ${REDIS_PASSWORD:}
+      repositories:
+        enabled: false        # los repositorios son JPA; evita los avisos de Redis
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     consumer:
