@@ -36,7 +36,7 @@ public record SnapshotResponse(
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record CategoryDto(Long id, String name, String description, boolean enabled,
                               Instant createdAt, Instant updatedAt) {
-        ProfessionalCategory toDomain() {
+        public ProfessionalCategory toDomain() {
             return new ProfessionalCategory(id, name, description, enabled, createdAt, updatedAt);
         }
     }
@@ -44,7 +44,7 @@ public record SnapshotResponse(
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record ProfessionalDto(Long id, Long categoryId, String firstName, String lastName,
                                   boolean enabled, Instant createdAt, Instant updatedAt) {
-        Professional toDomain() {
+        public Professional toDomain() {
             return new Professional(id, categoryId, firstName, lastName, enabled, createdAt, updatedAt);
         }
     }
@@ -53,7 +53,7 @@ public record SnapshotResponse(
     public record WeeklyScheduleDto(Long id, Long professionalId, DayOfWeek dayOfWeek,
                                     LocalTime startTime, LocalTime endTime, int slotDurationMinutes,
                                     boolean enabled, Instant createdAt, Instant updatedAt) {
-        WeeklySchedule toDomain() {
+        public WeeklySchedule toDomain() {
             return new WeeklySchedule(id, professionalId, dayOfWeek, startTime, endTime,
                     slotDurationMinutes, enabled, createdAt, updatedAt);
         }
