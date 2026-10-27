@@ -1,5 +1,7 @@
 package com.valeartola.catalogo.infrastructure.persistence.adapter;
 
+import com.valeartola.catalogo.domain.exception.CatalogResyncRequiredException;
+import com.valeartola.catalogo.domain.model.CatalogIncrementalUpdate;
 import com.valeartola.catalogo.domain.model.CatalogSnapshot;
 import com.valeartola.catalogo.domain.model.CatalogSyncState;
 import com.valeartola.catalogo.domain.model.SyncType;
@@ -58,6 +60,42 @@ public class JpaCatalogRepositoryAdapter implements CatalogRepository {
         state.setLocalVersion(snapshot.version());
         state.setLastSyncAt(now);
         state.setLastSyncType(SyncType.SNAPSHOT.name());
+        state.setLastError(null);
+        state.setUpdatedAt(now);
+        syncStateRepository.save(state);
+    }
+
+    /**
+     * Una versión = una transacción. Como en el catálogo no hay borrados físicos
+     * (las bajas son enabled = false), aplicar un cambio es siempre "insertar o actualizar".
+     * saveAll actualiza si el ID ya existe e inserta si no existe.
+     */
+    @Override
+    @Transactional
+    public void applyIncrementalUpdate(CatalogIncrementalUpdate update) {
+        CatalogSyncStateEntity state = loadSyncState();
+        Long localVersion = state.getLocalVersion();
+
+        // Ya aplicada: reprocesarla no produce efectos
+        if (localVersion != null && update.version() <= localVersion) {
+            return;
+        }
+        // Solo se admite la versión siguiente; saltear una dejaría datos inconsistentes
+        if (localVersion == null || update.version() != localVersion + 1) {
+            throw new CatalogResyncRequiredException(
+                    "No se puede aplicar la versión " + update.version()
+                            + " sobre la versión local " + localVersion);
+        }
+
+        // Mismo orden que el snapshot, por las claves foráneas
+        categoryRepository.saveAll(update.categories().stream().map(mapper::toEntity).toList());
+        professionalRepository.saveAll(update.professionals().stream().map(mapper::toEntity).toList());
+        scheduleRepository.saveAll(update.schedules().stream().map(mapper::toEntity).toList());
+
+        Instant now = Instant.now();
+        state.setLocalVersion(update.version());
+        state.setLastSyncAt(now);
+        state.setLastSyncType(SyncType.INCREMENTAL.name());
         state.setLastError(null);
         state.setUpdatedAt(now);
         syncStateRepository.save(state);
