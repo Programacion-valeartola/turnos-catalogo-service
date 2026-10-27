@@ -6,6 +6,7 @@ import com.valeartola.catalogo.domain.model.CatalogSyncState;
 import com.valeartola.catalogo.domain.model.SyncType;
 import com.valeartola.catalogo.domain.ports.out.CatalogRepository;
 import org.junit.jupiter.api.Test;
+import com.valeartola.catalogo.domain.model.CatalogIncrementalUpdate;
 
 import java.time.Instant;
 import java.util.List;
@@ -44,6 +45,11 @@ class SynchronizeCatalogUseCaseImplTest {
         @Override
         public void recordSyncError(String errorMessage) {
             lastError = errorMessage;
+        }
+
+        @Override
+        public void applyIncrementalUpdate(CatalogIncrementalUpdate update) {
+            localVersion = update.version();
         }
     }
 
