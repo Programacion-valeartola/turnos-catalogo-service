@@ -21,6 +21,9 @@ spring:
       password: ${REDIS_PASSWORD:}
       repositories:
         enabled: false        # los repositorios son JPA; evita los avisos de Redis
+      timeout: 5s
+      connect-timeout: 5s
+
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     consumer:
@@ -39,3 +42,10 @@ jwt:
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+
+catalog:
+  sync:
+    on-startup: true
+    check-interval-ms: 300000   # cada 5 minutos
+    max-attempts: 3
+    retry-backoff-ms: 2000

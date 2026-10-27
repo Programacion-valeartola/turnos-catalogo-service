@@ -1,30 +1,30 @@
 package com.valeartola.catalogo.infrastructure.startup;
 
-import com.valeartola.catalogo.domain.ports.in.SynchronizeCatalogUseCase;
+import com.valeartola.catalogo.domain.model.CatalogSyncOutcome;
+import com.valeartola.catalogo.domain.ports.in.KeepCatalogUpToDateUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Adaptador de entrada: cuando el servicio termina de arrancar,
- * verifica si la base está vacía y, en ese caso, pide el snapshot.
+ * Adaptador de entrada: al terminar de arrancar, pone al día el catálogo
+ * (snapshot si la base está vacía o hubo discontinuidad; incremental si hay versiones nuevas).
+ * Se puede desactivar con catalog.sync.on-startup=false (por ejemplo, en pruebas).
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "catalog.sync.on-startup", havingValue = "true", matchIfMissing = true)
 public class CatalogStartupSynchronizer {
 
-    private final SynchronizeCatalogUseCase synchronizeCatalogUseCase;
+    private final KeepCatalogUpToDateUseCase keepCatalogUpToDate;
 
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
-        try {
-            synchronizeCatalogUseCase.synchronizeIfEmpty();
-        } catch (Exception e) {
-            // El servicio sigue funcionando; el error queda registrado en catalog_sync_state
-            log.error("No se pudo inicializar el catálogo desde el snapshot: {}", e.getMessage());
-        }
+        CatalogSyncOutcome outcome = keepCatalogUpToDate.synchronize();
+        log.info("Sincronización inicial del catálogo: {}", outcome);
     }
 }
