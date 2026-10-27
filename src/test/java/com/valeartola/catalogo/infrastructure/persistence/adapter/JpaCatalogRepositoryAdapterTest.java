@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Prueba contra el PostgreSQL de Docker. Cada test corre dentro de una transacción
  * que se deshace al final: los datos reales del catálogo no se modifican.
  */
-@SpringBootTest
+@SpringBootTest(properties = "catalog.sync.on-startup=false")
 @Transactional
 class JpaCatalogRepositoryAdapterTest {
 
