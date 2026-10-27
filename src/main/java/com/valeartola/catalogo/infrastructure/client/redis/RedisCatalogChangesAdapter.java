@@ -118,7 +118,8 @@ public class RedisCatalogChangesAdapter implements CatalogChangesProvider {
         try {
             return call.execute();
         } catch (DataAccessException e) {
-            log.warn("Redis no disponible: {}", e.getMessage());
+            // Se muestra la causa concreta (dirección rechazada, credenciales inválidas, etc.)
+            log.warn("Redis no disponible: {}", e.getMostSpecificCause().getMessage());   // ← CAMBIO
             throw new CatalogChangesUnavailableException("Redis no disponible", e);
         }
     }
