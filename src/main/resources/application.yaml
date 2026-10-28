@@ -28,6 +28,11 @@ spring:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     consumer:
       group-id: ${KAFKA_CONSUMER_GROUP}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: record     # confirma el offset de cada mensaje recién después de procesarlo
 
 catedra:
   api:
@@ -46,6 +51,8 @@ cors:
 catalog:
   sync:
     on-startup: true
-    check-interval-ms: 300000   # cada 5 minutos
+    check-interval-ms: 300000
     max-attempts: 3
     retry-backoff-ms: 2000
+    kafka-topic: ${KAFKA_CATALOG_TOPIC}
+    kafka-enabled: true
