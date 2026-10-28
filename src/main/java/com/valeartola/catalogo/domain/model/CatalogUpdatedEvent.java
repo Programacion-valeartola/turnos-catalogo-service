@@ -12,4 +12,6 @@ public record CatalogUpdatedEvent(
         Instant occurredAt,
         String source
 ) {
+
+    public static final String TYPE = "CatalogUpdated";   // ← NUEVO
 }
