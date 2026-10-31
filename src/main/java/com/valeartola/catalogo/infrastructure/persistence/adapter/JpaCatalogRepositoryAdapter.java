@@ -15,6 +15,8 @@ import com.valeartola.catalogo.infrastructure.persistence.repository.WeeklySched
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import java.time.Instant;
 
@@ -30,6 +32,8 @@ public class JpaCatalogRepositoryAdapter implements CatalogRepository {
     private final WeeklyScheduleJpaRepository scheduleRepository;
     private final CatalogSyncStateJpaRepository syncStateRepository;
     private final CatalogPersistenceMapper mapper;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     @Transactional(readOnly = true)
@@ -48,6 +52,8 @@ public class JpaCatalogRepositoryAdapter implements CatalogRepository {
         scheduleRepository.deleteAllInBatch();
         professionalRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();
+        entityManager.flush();
+        entityManager.clear();
 
         // 2. Insertar la nueva copia: primero categorías, luego profesionales, luego horarios
         categoryRepository.saveAll(snapshot.categories().stream().map(mapper::toEntity).toList());
