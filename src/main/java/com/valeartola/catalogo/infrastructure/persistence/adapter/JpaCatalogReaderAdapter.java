@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Adaptador de salida: lectura de la copia local del catálogo con JPA.
@@ -40,5 +41,20 @@ public class JpaCatalogReaderAdapter implements CatalogReader {
     @Override
     public List<WeeklySchedule> findAllSchedules() {
         return scheduleRepository.findAll().stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    public Optional<Professional> findProfessionalById(Long id) {
+        return professionalRepository.findById(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<ProfessionalCategory> findCategoryById(Long id) {
+        return categoryRepository.findById(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<WeeklySchedule> findSchedulesByProfessionalId(Long professionalId) {
+        return scheduleRepository.findByProfessionalId(professionalId).stream().map(mapper::toDomain).toList();
     }
 }
