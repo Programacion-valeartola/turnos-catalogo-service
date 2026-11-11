@@ -1,14 +1,12 @@
 package com.valeartola.catalogo.infrastructure.web;
 
 import com.valeartola.catalogo.domain.model.ProfessionalSearchCriteria;
+import com.valeartola.catalogo.domain.ports.in.GetProfessionalUseCase;
 import com.valeartola.catalogo.domain.ports.in.SearchProfessionalsUseCase;
 import com.valeartola.catalogo.infrastructure.web.dto.ProfessionalResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -39,5 +37,16 @@ public class ProfessionalSearchController {
         return searchProfessionalsUseCase.search(criteria).stream()
                 .map(ProfessionalResponse::from)
                 .toList();
+    }
+
+    private final GetProfessionalUseCase getProfessionalUseCase;   // ← debajo del otro campo
+
+    /**
+     * Un profesional con sus horarios. Lo consume el servicio de turnos con su JWT de servicio.
+     * Ejemplo: GET /api/professionals/215
+     */
+    @GetMapping("/{id}")
+    public ProfessionalResponse getById(@PathVariable Long id) {
+        return ProfessionalResponse.from(getProfessionalUseCase.getById(id));
     }
 }

@@ -1,6 +1,7 @@
 package com.valeartola.catalogo.infrastructure.web;
 
 import com.valeartola.catalogo.domain.exception.InvalidSearchCriteriaException;
+import com.valeartola.catalogo.domain.exception.ProfessionalNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -27,6 +28,13 @@ public class ApiExceptionHandler {
     private ProblemDetail badRequest(String code, String detail) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
         problem.setProperty("code", code);
+        return problem;
+    }
+
+    @ExceptionHandler(ProfessionalNotFoundException.class)
+    public ProblemDetail handleProfessionalNotFound(ProfessionalNotFoundException e) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+        problem.setProperty("code", ProfessionalNotFoundException.CODE);
         return problem;
     }
 }
